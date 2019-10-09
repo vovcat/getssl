@@ -426,7 +426,7 @@ check_config() { # check the config files for all obvious errors
 
 check_getssl_upgrade() { # check if a more recent version of code is available available
   TEMP_UPGRADE_FILE="$(mktemp)"
-  curl --silent "$CODE_LOCATION" --output "$TEMP_UPGRADE_FILE"
+  curl -A $PROGNAME/$VERSION --silent "$CODE_LOCATION" --output "$TEMP_UPGRADE_FILE"
   errcode=$?
   if [[ $errcode -eq 60 ]]; then
     error_exit "curl needs updating, your version does not support SNI (multiple SSL domains on a single IP)"
@@ -811,7 +811,7 @@ get_certificate() { # get certificate for csr, if all domains validated.
   debug "certdata location = $CertData"
   if [[ "$CertData" ]] ; then
     echo -----BEGIN CERTIFICATE----- > "$gc_certfile"
-    curl --silent "$CertData" | openssl base64 -e  >> "$gc_certfile"
+    curl -A $PROGNAME/$VERSION --silent "$CertData" | openssl base64 -e  >> "$gc_certfile"
     echo -----END CERTIFICATE-----  >> "$gc_certfile"
     info "Certificate saved in $CERT_FILE"
   fi
@@ -831,7 +831,7 @@ get_certificate() { # get certificate for csr, if all domains validated.
                | sed 's/>//g')
   if [[ "$IssuerData" ]] ; then
     echo -----BEGIN CERTIFICATE----- > "$gc_cafile"
-    curl --silent "$IssuerData" | openssl base64 -e  >> "$gc_cafile"
+    curl -A $PROGNAME/$VERSION --silent "$IssuerData" | openssl base64 -e  >> "$gc_cafile"
     echo -----END CERTIFICATE-----  >> "$gc_cafile"
     info "The intermediate CA cert is in $gc_cafile"
   fi
@@ -840,7 +840,7 @@ get_certificate() { # get certificate for csr, if all domains validated.
 get_cr() { # get curl response
   url="$1"
   debug url "$url"
-  response=$(curl --silent "$url")
+  response=$(curl -A $PROGNAME/$VERSION --silent "$url")
   ret=$?
   debug response  "$response"
   code=$(json_get "$response" status)
@@ -1135,7 +1135,7 @@ send_signed_request() { # Sends a request to the ACME server, signed with your p
 
   CURL_HEADER="$TEMP_DIR/curl.header"
   dp="$TEMP_DIR/curl.dump"
-  CURL="curl --silent --dump-header $CURL_HEADER "
+  CURL="curl -A $PROGNAME/$VERSION --silent --dump-header $CURL_HEADER "
   if [[ ${_USE_DEBUG} -eq 1 ]]; then
     CURL="$CURL --trace-ascii $dp "
   fi
@@ -1919,7 +1919,7 @@ for d in $alldomains; do
       else
         sleep "$HTTP_TOKEN_CHECK_WAIT"
         # check that we can reach the challenge ourselves, if not, then error
-        if [[ ! "$(curl -k --silent --location "$wellknown_url")" == "$keyauthorization" ]]; then
+        if [[ ! "$(curl -A $PROGNAME/$VERSION --silent -k --location "$wellknown_url")" == "$keyauthorization" ]]; then
           error_exit "for some reason could not reach $wellknown_url - please check it manually"
         fi
       fi
