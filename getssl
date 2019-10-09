@@ -1529,7 +1529,7 @@ if [[ ${_CHECK_ALL} -eq 1 ]]; then
   for dir in ${DOMAIN_STORAGE}/*; do
     if [[ -d "$dir" ]]; then
       debug "Checking $dir"
-      cmd="$0 -U" # No update checks when calling recursively
+      cmd="bash $0 -U" # No update checks when calling recursively
       if [[ ${_USE_DEBUG} -eq 1 ]]; then
         cmd="$cmd -d"
       fi
